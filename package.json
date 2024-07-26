@@ -1,9 +1,9 @@
 
 {
-  "name": "camebot",
+  "name": "cure",
   "version": "1.0.0",
   "description": "Description de votre application",
-  "main": "bot.js",
+  "main": "bot.html",
   
   "dependencies": {
     "node-telegram-bot-api": "^0.59.0",
