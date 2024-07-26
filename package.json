@@ -13,7 +13,7 @@
 
   },
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.html"
   },
   "author": "Votre Nom",
   "license": "MIT"
