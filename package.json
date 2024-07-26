@@ -13,7 +13,7 @@
 
   },
   "scripts": {
-    "start": "node came.js"
+    "start": "node bot.js"
   },
   "author": "Votre Nom",
   "license": "MIT"
